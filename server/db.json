@@ -1,0 +1,99 @@
+{
+  "users": [
+    {
+      "id": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "email": "test@email.com",
+      "passwordHash": "$2a$10$ldZv7sh9oy6aVzx3K5FrMuEvVqYjRhYHdsbpuyWu9M7UNf6j769pW",
+      "createdAt": "2026-05-19T08:30:20.939Z",
+      "profile": {
+        "firstName": "Michel",
+        "lastName": "Nagele",
+        "university": "BZZ",
+        "studyProgram": "",
+        "semester": 4,
+        "bio": "",
+        "updatedAt": "2026-05-26T08:57:52.277Z"
+      },
+      "subjects": [
+        {
+          "name": "Math",
+          "level": "intermediate",
+          "goal": "learn"
+        },
+        {
+          "name": "German",
+          "level": "beginner",
+          "goal": "learn"
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
+    },
+    {
+      "id": "c928971d-394a-457d-bbbf-d3103cd3fad8",
+      "email": "kutterk@gmail.com",
+      "passwordHash": "$2a$10$NSO2K2r1oWO4B5IynRW7qunbDdx2V6X4/s/O/5KpNBFcAjMbr8/ai",
+      "createdAt": "2026-05-26T08:03:07.955Z",
+      "profile": {
+        "firstName": "Kevin",
+        "lastName": "Kutter",
+        "university": "HS",
+        "studyProgram": "Computer",
+        "semester": 30,
+        "bio": "Short bio",
+        "updatedAt": "2026-05-26T08:03:42.876Z"
+      },
+      "subjects": [
+        {
+          "name": "Algebro",
+          "level": "advanced",
+          "goal": "Hello"
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Sunday",
+          "startTime": "00:00",
+          "endTime": "23:00"
+        }
+      ]
+    },
+    {
+      "id": "01d59573-eadc-47d0-b229-e17eb769eb1d",
+      "email": "fynn@finance.com",
+      "passwordHash": "$2a$10$UksJ4W71U9dXv7Pg/BdaV.AnQSpNXrDVSEcTg73njFj3FyI9aWcvG",
+      "createdAt": "2026-05-26T08:08:55.111Z",
+      "profile": {
+        "firstName": "Fynn",
+        "lastName": "Wilhelm",
+        "university": "BZZ",
+        "studyProgram": "IT",
+        "semester": 4,
+        "bio": "lalalalaa",
+        "updatedAt": "2026-05-26T08:10:15.254Z"
+      },
+      "subjects": [
+        {
+          "name": "IT",
+          "level": "advanced",
+          "goal": "good marks"
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Wednesday",
+          "startTime": "18:00",
+          "endTime": "23:00"
+        }
+      ]
+    }
+  ]
+}
