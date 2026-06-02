@@ -5,6 +5,8 @@
       "email": "test@email.com",
       "passwordHash": "$2a$10$ldZv7sh9oy6aVzx3K5FrMuEvVqYjRhYHdsbpuyWu9M7UNf6j769pW",
       "createdAt": "2026-05-19T08:30:20.939Z",
+      "status": "active",
+      "blockedUserIds": [],
       "profile": {
         "firstName": "Michel",
         "lastName": "Nagele",
@@ -12,18 +14,26 @@
         "studyProgram": "",
         "semester": 4,
         "bio": "",
-        "updatedAt": "2026-05-26T08:57:52.277Z"
+        "updatedAt": "2026-06-02T07:30:49.714Z"
       },
       "subjects": [
         {
           "name": "Math",
           "level": "intermediate",
+          "role": "seeking",
           "goal": "learn"
         },
         {
           "name": "German",
           "level": "beginner",
+          "role": "seeking",
           "goal": "learn"
+        },
+        {
+          "name": "English",
+          "level": "beginner",
+          "role": "offering",
+          "goal": ""
         }
       ],
       "learningGoals": [],
@@ -40,6 +50,8 @@
       "email": "kutterk@gmail.com",
       "passwordHash": "$2a$10$NSO2K2r1oWO4B5IynRW7qunbDdx2V6X4/s/O/5KpNBFcAjMbr8/ai",
       "createdAt": "2026-05-26T08:03:07.955Z",
+      "status": "active",
+      "blockedUserIds": [],
       "profile": {
         "firstName": "Kevin",
         "lastName": "Kutter",
@@ -53,6 +65,7 @@
         {
           "name": "Algebro",
           "level": "advanced",
+          "role": "offering",
           "goal": "Hello"
         }
       ],
@@ -70,6 +83,8 @@
       "email": "fynn@finance.com",
       "passwordHash": "$2a$10$UksJ4W71U9dXv7Pg/BdaV.AnQSpNXrDVSEcTg73njFj3FyI9aWcvG",
       "createdAt": "2026-05-26T08:08:55.111Z",
+      "status": "active",
+      "blockedUserIds": [],
       "profile": {
         "firstName": "Fynn",
         "lastName": "Wilhelm",
@@ -83,6 +98,7 @@
         {
           "name": "IT",
           "level": "advanced",
+          "role": "offering",
           "goal": "good marks"
         }
       ],
@@ -94,6 +110,226 @@
           "endTime": "23:00"
         }
       ]
+    },
+    {
+      "id": "d6fb8c4a-601c-4367-9df2-ceae8b9769a6",
+      "email": "anna@study.com",
+      "passwordHash": "$2a$10$b03tYwHFao5KSXwhtffsMuWCKSNQOa4tzkhtD2rpZqEhrU4RJ5SMi",
+      "createdAt": "2026-05-28T09:00:00.000Z",
+      "status": "active",
+      "blockedUserIds": [],
+      "profile": {
+        "firstName": "Anna",
+        "lastName": "Berger",
+        "university": "BZZ",
+        "studyProgram": "Mathematics",
+        "semester": 6,
+        "bio": "Happy to help with calculus and algebra.",
+        "updatedAt": "2026-05-28T09:00:00.000Z"
+      },
+      "subjects": [
+        {
+          "name": "Math",
+          "level": "advanced",
+          "role": "offering",
+          "goal": "Help others pass"
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "16:00",
+          "endTime": "18:00"
+        }
+      ]
+    },
+    {
+      "id": "c7b53cc8-2844-480b-9002-4ec77ee93823",
+      "email": "ben@study.com",
+      "passwordHash": "$2a$10$b03tYwHFao5KSXwhtffsMuWCKSNQOa4tzkhtD2rpZqEhrU4RJ5SMi",
+      "createdAt": "2026-05-28T09:05:00.000Z",
+      "status": "active",
+      "blockedUserIds": [],
+      "profile": {
+        "firstName": "Ben",
+        "lastName": "Fischer",
+        "university": "ETH",
+        "studyProgram": "Linguistics",
+        "semester": 3,
+        "bio": "Native German speaker, still fighting with calculus.",
+        "updatedAt": "2026-05-28T09:05:00.000Z"
+      },
+      "subjects": [
+        {
+          "name": "Math",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": "Pass the midterm"
+        },
+        {
+          "name": "German",
+          "level": "advanced",
+          "role": "offering",
+          "goal": "Help with grammar"
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "19:00",
+          "endTime": "20:30"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "10:00",
+          "endTime": "12:00"
+        }
+      ]
+    },
+    {
+      "id": "7526c330-4619-465f-8709-a3d8080a802c",
+      "email": "carla@study.com",
+      "passwordHash": "$2a$10$b03tYwHFao5KSXwhtffsMuWCKSNQOa4tzkhtD2rpZqEhrU4RJ5SMi",
+      "createdAt": "2026-05-28T09:10:00.000Z",
+      "status": "deactivated",
+      "blockedUserIds": [],
+      "profile": {
+        "firstName": "Carla",
+        "lastName": "Weiss",
+        "university": "BZZ",
+        "studyProgram": "Mathematics",
+        "semester": 8,
+        "bio": "Account currently deactivated.",
+        "updatedAt": "2026-05-28T09:10:00.000Z"
+      },
+      "subjects": [
+        {
+          "name": "Math",
+          "level": "advanced",
+          "role": "offering",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
+    },
+    {
+      "id": "3983c96c-df2b-4eb7-90ee-083e620025da",
+      "email": "emma@study.com",
+      "passwordHash": "$2a$10$b03tYwHFao5KSXwhtffsMuWCKSNQOa4tzkhtD2rpZqEhrU4RJ5SMi",
+      "createdAt": "2026-05-28T09:15:00.000Z",
+      "status": "active",
+      "blockedUserIds": [],
+      "profile": {
+        "firstName": "Emma",
+        "lastName": "Schulz",
+        "university": "BZZ",
+        "studyProgram": "Germanistik",
+        "semester": 5,
+        "bio": "Love grammar and tutoring beginners.",
+        "updatedAt": "2026-05-28T09:15:00.000Z"
+      },
+      "subjects": [
+        {
+          "name": "German",
+          "level": "advanced",
+          "role": "offering",
+          "goal": "Tutor beginners"
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "19:00"
+        }
+      ]
+    },
+    {
+      "id": "54e8fd65-62fd-47f4-a374-b770e714d3d0",
+      "email": "michi@mail.ch",
+      "passwordHash": "$2a$10$JC4YbhCGvlH0AdgfjnMcQusm6MU12QASTHfhTFU8lJ3EZ21KQomRe",
+      "createdAt": "2026-06-02T07:29:37.036Z",
+      "profile": {
+        "firstName": "Michel",
+        "lastName": "Nagele",
+        "university": "BZZ",
+        "studyProgram": "IT",
+        "semester": 4,
+        "bio": "asdf",
+        "updatedAt": "2026-06-02T07:29:51.068Z"
+      },
+      "subjects": [
+        {
+          "name": "English",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e58982a1-f08c-46f5-ac6d-27c304ab7b56",
+      "requesterId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "recipientId": "c7b53cc8-2844-480b-9002-4ec77ee93823",
+      "status": "pending",
+      "createdAt": "2026-06-02T07:28:46.802Z",
+      "updatedAt": "2026-06-02T07:28:46.802Z"
+    },
+    {
+      "id": "17c53df1-80fa-46c4-9905-ac98860661ac",
+      "requesterId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "recipientId": "54e8fd65-62fd-47f4-a374-b770e714d3d0",
+      "status": "accepted",
+      "createdAt": "2026-06-02T07:31:30.464Z",
+      "updatedAt": "2026-06-02T07:31:39.635Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "77145363-e43b-48e0-878e-7d9cf77fc363",
+      "connectionId": "e58982a1-f08c-46f5-ac6d-27c304ab7b56",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "Hi",
+      "createdAt": "2026-06-02T07:28:46.803Z"
+    },
+    {
+      "id": "1bfb92e0-382d-4b31-ba3b-a63be9486cb7",
+      "connectionId": "17c53df1-80fa-46c4-9905-ac98860661ac",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "hi",
+      "createdAt": "2026-06-02T07:31:30.465Z"
+    },
+    {
+      "id": "0e3b2312-b540-4400-8009-4339626157c6",
+      "connectionId": "17c53df1-80fa-46c4-9905-ac98860661ac",
+      "senderId": "54e8fd65-62fd-47f4-a374-b770e714d3d0",
+      "body": "hi",
+      "createdAt": "2026-06-02T07:31:39.635Z"
     }
   ]
 }

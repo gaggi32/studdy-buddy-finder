@@ -1,11 +1,17 @@
 import { useState } from 'react';
 
-const EMPTY_SUBJECT = { name: '', level: 'beginner', goal: '' };
+const EMPTY_SUBJECT = { name: '', level: 'beginner', role: 'seeking', goal: '' };
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
+const ROLES = [
+  { value: 'seeking', label: 'Looking for help' },
+  { value: 'offering', label: 'Offering help' }
+];
 
 export default function SubjectsGoals({ initialSubjects, initialGoals, onSave, onBack }) {
   const [subjects, setSubjects] = useState(
-    initialSubjects?.length ? initialSubjects : [{ ...EMPTY_SUBJECT }]
+    initialSubjects?.length
+      ? initialSubjects.map((s) => ({ ...EMPTY_SUBJECT, ...s }))
+      : [{ ...EMPTY_SUBJECT }]
   );
   const [goalInput, setGoalInput] = useState('');
   const [goals, setGoals] = useState(initialGoals || []);
@@ -81,6 +87,13 @@ export default function SubjectsGoals({ initialSubjects, initialGoals, onSave, o
             {idx === 0 && <label className="field-label">Level</label>}
             <select value={s.level} onChange={(e) => updateSubject(idx, { level: e.target.value })}>
               {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
+
+          <div className="field">
+            {idx === 0 && <label className="field-label">Role</label>}
+            <select value={s.role} onChange={(e) => updateSubject(idx, { role: e.target.value })}>
+              {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           </div>
 

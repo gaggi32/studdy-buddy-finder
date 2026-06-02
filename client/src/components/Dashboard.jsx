@@ -9,6 +9,9 @@ const LEVEL_CLASS = {
   advanced: 'level-advanced'
 };
 
+const ROLE_LABEL = { seeking: 'Looking for help', offering: 'Offering help' };
+const ROLE_CLASS = { seeking: 'role-seeking', offering: 'role-offering' };
+
 export default function Dashboard() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -44,8 +47,26 @@ export default function Dashboard() {
           <h1>{firstName ? `Hey, ${firstName} 👋` : 'Welcome 👋'}</h1>
           <p className="muted">Here's your study profile at a glance.</p>
         </div>
-        <button className="btn btn-ghost" onClick={() => navigate('/onboarding')}>
+        <button className="btn btn-ghost" onClick={() => navigate('/profile/edit')}>
           Edit profile
+        </button>
+      </div>
+
+      {/* Quick actions */}
+      <div className="quick-actions">
+        <button className="quick-action" onClick={() => navigate('/matches')}>
+          <span className="quick-action-icon">🔍</span>
+          <span>
+            <span className="quick-action-title">Find study partners</span>
+            <span className="quick-action-sub">See students who match your subjects & times</span>
+          </span>
+        </button>
+        <button className="quick-action" onClick={() => navigate('/messages')}>
+          <span className="quick-action-icon">💬</span>
+          <span>
+            <span className="quick-action-title">Messages</span>
+            <span className="quick-action-sub">Requests and your private chats</span>
+          </span>
         </button>
       </div>
 
@@ -100,6 +121,9 @@ export default function Dashboard() {
               <div className="subject-item" key={i}>
                 <span className="subject-name">{s.name}</span>
                 <span className="subject-goal">{s.goal || ''}</span>
+                {s.role && (
+                  <span className={`role-badge ${ROLE_CLASS[s.role] ?? ''}`}>{ROLE_LABEL[s.role]}</span>
+                )}
                 <span className={`level-badge ${LEVEL_CLASS[s.level] ?? ''}`}>{s.level}</span>
               </div>
             ))}

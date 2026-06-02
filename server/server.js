@@ -5,6 +5,8 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
+const matchRoutes = require('./routes/matches');
+const connectionRoutes = require('./routes/connections');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -16,6 +18,8 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', profileRoutes);
+app.use('/api/matches', matchRoutes);
+app.use('/api/connections', connectionRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 

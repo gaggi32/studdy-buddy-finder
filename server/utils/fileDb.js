@@ -17,9 +17,10 @@ async function readDb() {
   const raw = await fs.promises.readFile(DB_PATH, 'utf-8');
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed.users || !Array.isArray(parsed.users)) {
-      parsed.users = [];
-    }
+    // Normalize the top-level collections so routes can assume they exist.
+    if (!Array.isArray(parsed.users)) parsed.users = [];
+    if (!Array.isArray(parsed.connections)) parsed.connections = [];
+    if (!Array.isArray(parsed.messages)) parsed.messages = [];
     return parsed;
   } catch (err) {
     throw new Error(`Corrupt db.json: ${err.message}`);
@@ -48,4 +49,14 @@ async function updateUser(userId, mutator) {
   return updated;
 }
 
-module.exports = { readDb, writeDb, updateUser, DB_PATH };
+// Read–modify–write the whole db in one serialized step. The mutator receives
+// the parsed db, mutates it in place (or returns a new object), and whatever it
+// returns (or the same db) is persisted. Returns the mutator's return value.
+async function updateDb(mutator) {
+  const db = await readDb();
+  const result = await mutator(db);
+  await writeDb(db);
+  return result;
+}
+
+module.exports = { readDb, writeDb, updateUser, updateDb, DB_PATH };

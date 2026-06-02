@@ -6,6 +6,7 @@ const router = express.Router();
 
 const VALID_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const VALID_LEVELS = ['beginner', 'intermediate', 'advanced'];
+const VALID_ROLES = ['seeking', 'offering'];
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 function publicUser(user) {
@@ -79,9 +80,16 @@ router.put('/:userId/subjects', requireAuth, requireSelf, async (req, res, next)
           error: `subject level must be one of: ${VALID_LEVELS.join(', ')}`
         });
       }
+      const role = (s.role || 'seeking').toLowerCase();
+      if (!VALID_ROLES.includes(role)) {
+        return res.status(400).json({
+          error: `subject role must be one of: ${VALID_ROLES.join(', ')}`
+        });
+      }
       cleanedSubjects.push({
         name: String(s.name).trim(),
         level,
+        role,
         goal: s.goal ? String(s.goal).trim() : ''
       });
     }
@@ -136,6 +144,55 @@ router.put('/:userId/availability', requireAuth, requireSelf, async (req, res, n
       availability: cleaned
     }));
 
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// US-10: Activate / deactivate the account. Deactivated profiles are hidden
+// from everyone's matching list (US-06) but the owner can still log in.
+router.put('/:userId/account', requireAuth, requireSelf, async (req, res, next) => {
+  try {
+    const { status } = req.body || {};
+    if (status !== 'active' && status !== 'deactivated') {
+      return res.status(400).json({ error: "status must be 'active' or 'deactivated'" });
+    }
+    const updated = await updateUser(req.params.userId, (u) => ({ ...u, status }));
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// US-06: Block another user — they disappear from each other's suggestions.
+router.post('/:userId/block', requireAuth, requireSelf, async (req, res, next) => {
+  try {
+    const { targetId } = req.body || {};
+    if (!targetId || targetId === req.params.userId) {
+      return res.status(400).json({ error: 'A valid targetId is required' });
+    }
+    const updated = await updateUser(req.params.userId, (u) => {
+      const blocked = new Set(u.blockedUserIds || []);
+      blocked.add(targetId);
+      return { ...u, blockedUserIds: [...blocked] };
+    });
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// Undo a block.
+router.delete('/:userId/block/:targetId', requireAuth, requireSelf, async (req, res, next) => {
+  try {
+    const updated = await updateUser(req.params.userId, (u) => ({
+      ...u,
+      blockedUserIds: (u.blockedUserIds || []).filter((id) => id !== req.params.targetId)
+    }));
     return res.json({ user: publicUser(updated) });
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
