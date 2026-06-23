@@ -12,7 +12,7 @@ function requireAuth(req, res, next) {
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    req.user = { id: payload.sub, email: payload.email };
+    req.user = { id: payload.sub, email: payload.email, isAdmin: !!payload.isAdmin };
     return next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -26,4 +26,11 @@ function requireSelf(req, res, next) {
   return next();
 }
 
-module.exports = { requireAuth, requireSelf, JWT_SECRET };
+function requireAdmin(req, res, next) {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ error: 'Forbidden: administrator access required' });
+  }
+  return next();
+}
+
+module.exports = { requireAuth, requireSelf, requireAdmin, JWT_SECRET };

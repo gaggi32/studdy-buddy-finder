@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const infoMessage = location.state?.infoMessage || '';
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -36,6 +39,12 @@ export default function Login() {
         <h1>Welcome back</h1>
         <p className="auth-card subtitle">Sign in to your account to continue.</p>
 
+        {infoMessage && (
+          <div className="toast toast-success" style={{ position: 'relative', top: 0, left: 0, transform: 'none', marginBottom: 16, width: '100%' }}>
+            ✓ {infoMessage}
+          </div>
+        )}
+
         {error && <div className="error-banner">⚠ {error}</div>}
 
         <form onSubmit={onSubmit}>
@@ -53,7 +62,12 @@ export default function Login() {
           </div>
 
           <div className="field">
-            <label className="field-label">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label className="field-label">Password</label>
+              <Link to="/forgot-password" style={{ fontSize: '0.78rem', color: 'var(--accent-h)' }}>
+                Passwort vergessen?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}

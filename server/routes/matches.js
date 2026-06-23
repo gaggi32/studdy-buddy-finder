@@ -31,6 +31,9 @@ router.get('/', requireAuth, async (req, res, next) => {
     const db = await readDb();
     const me = db.users.find((u) => u.id === req.user.id);
     if (!me) return res.status(404).json({ error: 'User not found' });
+    if (me.status === 'locked') {
+      return res.json({ matches: [] });
+    }
 
     const hasOwnAvailability = (me.availability || []).length > 0;
 

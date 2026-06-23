@@ -1,17 +1,27 @@
-import { createBrowserRouter, Outlet, Navigate, Link, NavLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { createBrowserRouter, Outlet, Navigate, Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Register from './components/Register.jsx';
 import Login from './components/Login.jsx';
+import ForgotPassword from './components/ForgotPassword.jsx';
+import ResetPassword from './components/ResetPassword.jsx';
 import OnboardingFlow from './components/OnboardingFlow.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import Matches from './components/Matches.jsx';
 import Messages from './components/Messages.jsx';
 import Chat from './components/Chat.jsx';
 import EditProfile from './components/EditProfile.jsx';
+import AdminDashboard from './components/AdminDashboard.jsx';
+import { connectionApi, profileApi } from './api.js';
 
 function Protected({ children }) {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" replace />;
+}
+
+function ProtectedAdmin({ children }) {
+  const { user } = useAuth();
+  return user && user.isAdmin ? children : <Navigate to="/dashboard" replace />;
 }
 
 function initials(email) {
@@ -23,9 +33,30 @@ function HomeRedirect() {
   return <Navigate to={user ? '/dashboard' : '/login'} replace />;
 }
 
-// App shell: top navigation + the active route below it.
 function RootLayout() {
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Sync user status from server on mount/reload
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    profileApi.get(user.id)
+      .then((fresh) => {
+        if (!cancelled) setUser(fresh);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, setUser]);
+
+  async function handleContactAdmin() {
+    try {
+      const conn = await connectionApi.contactAdmin();
+      navigate(`/messages/${conn.id}`);
+    } catch (err) {
+      alert(err.message);
+    }
+  }
 
   return (
     <>
@@ -38,8 +69,13 @@ function RootLayout() {
         {user && (
           <div className="navbar-links">
             <NavLink to="/dashboard" className="nav-link">Dashboard</NavLink>
-            <NavLink to="/matches" className="nav-link">Find partners</NavLink>
-            <NavLink to="/messages" className="nav-link">Messages</NavLink>
+            {user.status !== 'locked' && (
+              <>
+                <NavLink to="/matches" className="nav-link">Find partners</NavLink>
+                <NavLink to="/messages" className="nav-link">Messages</NavLink>
+              </>
+            )}
+            {user.isAdmin && <NavLink to="/admin" className="nav-link">Admin</NavLink>}
           </div>
         )}
 
@@ -59,6 +95,27 @@ function RootLayout() {
         )}
       </nav>
 
+      {user && user.status === 'locked' && (
+        <div style={{
+          background: 'var(--danger-bg)',
+          color: 'var(--danger)',
+          borderBottom: '1px solid #7f1d1d44',
+          padding: '10px 24px',
+          textAlign: 'center',
+          fontSize: '.875rem',
+          fontWeight: 600,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <span>⚠️ Ihr Konto wurde gesperrt. Sie können keine Matches sehen oder neue Nachrichten an andere senden.</span>
+          <button className="btn btn-sm btn-danger" onClick={handleContactAdmin} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+            Support kontaktieren
+          </button>
+        </div>
+      )}
+
       <Outlet />
     </>
   );
@@ -71,12 +128,15 @@ export const router = createBrowserRouter([
       { path: '/', element: <HomeRedirect /> },
       { path: '/register', element: <Register /> },
       { path: '/login', element: <Login /> },
+      { path: '/forgot-password', element: <ForgotPassword /> },
+      { path: '/reset-password', element: <ResetPassword /> },
       { path: '/onboarding', element: <Protected><OnboardingFlow /></Protected> },
       { path: '/dashboard', element: <Protected><Dashboard /></Protected> },
       { path: '/matches', element: <Protected><Matches /></Protected> },
       { path: '/messages', element: <Protected><Messages /></Protected> },
       { path: '/messages/:connectionId', element: <Protected><Chat /></Protected> },
       { path: '/profile/edit', element: <Protected><EditProfile /></Protected> },
+      { path: '/admin', element: <ProtectedAdmin><AdminDashboard /></ProtectedAdmin> },
       { path: '*', element: <Navigate to="/" replace /> }
     ]
   }

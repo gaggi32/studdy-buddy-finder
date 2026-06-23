@@ -6,17 +6,25 @@ const VALID_ROLES = ['seeking', 'offering'];
 // future. The pause simply expires at read time, so the account reactivates
 // automatically once the date passes — no scheduled job required.
 function isPaused(user) {
-  if (!user.pausedUntil) return false;
-  const until = new Date(user.pausedUntil);
-  return !Number.isNaN(until.getTime()) && until.getTime() > Date.now();
+  const now = Date.now();
+  if (user.pausedFrom && user.pausedUntil) {
+    const from = new Date(user.pausedFrom).getTime();
+    const until = new Date(user.pausedUntil).getTime();
+    if (!Number.isNaN(from) && !Number.isNaN(until)) {
+      return now >= from && now <= until;
+    }
+  }
+  if (user.pausedUntil) {
+    const until = new Date(user.pausedUntil).getTime();
+    return !Number.isNaN(until) && until > now;
+  }
+  return false;
 }
 
 // A profile is visible in matching only when the account is active: not manually
-// deactivated (US-11) and not currently paused (US-12). Anything other than an
-// explicit 'deactivated' status counts as active (older records created before
-// this field existed have no status).
+// deactivated (US-11), not locked (US-14), and not currently paused (US-12).
 function isActive(user) {
-  return user.status !== 'deactivated' && !isPaused(user);
+  return user.status !== 'deactivated' && user.status !== 'locked' && !isPaused(user);
 }
 
 // True when either user has blocked the other (blocking is symmetric for the

@@ -43,6 +43,9 @@ export default function EditProfile() {
   const [toast, setToast] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmChecked, setDeleteConfirmChecked] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [modalError, setModalError] = useState('');
 
   // Pull the freshest record on mount so we never edit stale data.
   useEffect(() => {
@@ -67,19 +70,29 @@ export default function EditProfile() {
   // US-13: after the account is deleted, leave the app and clear the session.
   useEffect(() => {
     if (!deleting) return;
-    navigate('/register', { replace: true });
+    navigate('/login', { replace: true, state: { infoMessage: 'Ihr Konto wurde dauerhaft gelöscht.' } });
     logout();
   }, [deleting, navigate, logout]);
 
   async function handleDelete() {
-    setError('');
+    setModalError('');
+    if (!deleteConfirmChecked) {
+      setModalError('Bitte bestätigen Sie das Kontrollkästchen.');
+      return;
+    }
+    if (!deletePassword) {
+      setModalError('Bitte geben Sie Ihr Passwort ein.');
+      return;
+    }
+    setBusy(true);
     try {
-      await profileApi.deleteAccount(user.id);
+      await profileApi.deleteAccount(user.id, deletePassword);
       setConfirmDelete(false);
-      setDeleting(true); // triggers the redirect + logout effect above
+      setDeleting(true); // triggers redirect + logout
     } catch (err) {
-      setError(err.message);
-      setConfirmDelete(false);
+      setModalError(err.message);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -355,7 +368,12 @@ export default function EditProfile() {
             <button
               type="button"
               className="btn btn-danger btn-sm"
-              onClick={() => setConfirmDelete(true)}
+              onClick={() => {
+                setDeletePassword('');
+                setDeleteConfirmChecked(false);
+                setModalError('');
+                setConfirmDelete(true);
+              }}
             >
               Delete account
             </button>
@@ -373,24 +391,53 @@ export default function EditProfile() {
         </div>
       </form>
 
-      {/* US-13: confirm before permanent deletion */}
       {confirmDelete && (
         <div className="modal-overlay" onMouseDown={() => setConfirmDelete(false)}>
           <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Delete account?</h2>
+              <h2>Konto löschen?</h2>
               <button className="btn-icon" onClick={() => setConfirmDelete(false)} title="Close">✕</button>
             </div>
+            
+            {modalError && <div className="error-banner" style={{ marginTop: 8, marginBottom: 12 }}>⚠ {modalError}</div>}
+            
             <p className="muted" style={{ marginBottom: 16 }}>
-              This permanently deletes your profile, all your matches and your messages.
-              This action cannot be undone.
+              Diese Aktion löscht Ihr Profil, all Ihre Matches und Ihren Chatverlauf unwiderruflich. Dies kann nicht rückgängig gemacht werden.
             </p>
+
+            <div className="field" style={{ marginBottom: 16 }}>
+              <label className="field-label">Ihr Passwort zur Bestätigung</label>
+              <input
+                type="password"
+                placeholder="Geben Sie Ihr Passwort ein"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <label className="toggle-row" style={{ marginBottom: 20 }}>
+              <input
+                type="checkbox"
+                checked={deleteConfirmChecked}
+                onChange={(e) => setDeleteConfirmChecked(e.target.checked)}
+              />
+              <span style={{ fontSize: '0.85rem' }}>
+                Ich bestätige die dauerhafte Löschung meines Kontos und aller Daten.
+              </span>
+            </label>
+
             <div className="modal-actions">
               <button type="button" className="btn btn-ghost" onClick={() => setConfirmDelete(false)}>
-                Cancel
+                Abbrechen
               </button>
-              <button type="button" className="btn btn-danger" onClick={handleDelete}>
-                Yes, delete my account
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleDelete}
+                disabled={busy || !deleteConfirmChecked || !deletePassword}
+              >
+                Ja, Konto dauerhaft löschen
               </button>
             </div>
           </div>

@@ -29,7 +29,11 @@ export const authApi = {
   register: (email, password) =>
     api.post('/auth/register', { email, password }).then((r) => r.data),
   login: (email, password) =>
-    api.post('/auth/login', { email, password }).then((r) => r.data)
+    api.post('/auth/login', { email, password }).then((r) => r.data),
+  forgotPassword: (email) =>
+    api.post('/auth/forgot-password', { email }).then((r) => r.data),
+  resetPassword: (token, password) =>
+    api.post('/auth/reset-password', { token, password }).then((r) => r.data)
 };
 
 export const profileApi = {
@@ -44,18 +48,24 @@ export const profileApi = {
   setAccountStatus: (userId, status) =>
     api.put(`/users/${userId}/account`, { status }).then((r) => r.data.user),
   // US-12: pause the profile for a number of days (auto-reactivates), or resume early.
-  pauseProfile: (userId, days) =>
-    api.put(`/users/${userId}/pause`, { days }).then((r) => r.data.user),
+  pauseProfile: (userId, days, pausedFrom, pausedUntil) =>
+    api.put(`/users/${userId}/pause`, { days, pausedFrom, pausedUntil }).then((r) => r.data.user),
   resumeProfile: (userId) =>
     api.delete(`/users/${userId}/pause`).then((r) => r.data.user),
   // US-13: permanently delete the account and all associated data.
-  deleteAccount: (userId) =>
-    api.delete(`/users/${userId}`).then(() => true),
+  deleteAccount: (userId, password) =>
+    api.delete(`/users/${userId}`, { data: { password } }).then(() => true),
   // US-06: block / unblock a user.
   blockUser: (userId, targetId) =>
     api.post(`/users/${userId}/block`, { targetId }).then((r) => r.data.user),
   unblockUser: (userId, targetId) =>
     api.delete(`/users/${userId}/block/${targetId}`).then((r) => r.data.user)
+};
+
+export const adminApi = {
+  listUsers: () => api.get('/users').then((r) => r.data.users),
+  lockUser: (userId) => api.put(`/users/${userId}/lock`).then((r) => r.data.user),
+  unlockUser: (userId) => api.put(`/users/${userId}/unlock`).then((r) => r.data.user)
 };
 
 // US-06 / US-07: suggested study partners.
@@ -76,7 +86,9 @@ export const connectionApi = {
     api.get(`/connections/${id}/messages`).then((r) => r.data),
   // US-09: send a message in the private chat.
   sendMessage: (id, body) =>
-    api.post(`/connections/${id}/messages`, { body }).then((r) => r.data.message)
+    api.post(`/connections/${id}/messages`, { body }).then((r) => r.data.message),
+  contactAdmin: () =>
+    api.post('/connections/contact-admin').then((r) => r.data.connection)
 };
 
 export default api;

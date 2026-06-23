@@ -1,6 +1,7 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const { readDb, updateUser, updateDb } = require('../utils/fileDb');
-const { requireAuth, requireSelf } = require('../middleware/auth');
+const { requireAuth, requireSelf, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -14,6 +15,16 @@ function publicUser(user) {
   const { passwordHash, ...rest } = user;
   return rest;
 }
+
+// GET /api/users - List all users (Admin only)
+router.get('/', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const db = await readDb();
+    return res.json({ users: db.users.map(publicUser) });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 // GET current user's full record
 router.get('/:userId', requireAuth, requireSelf, async (req, res, next) => {
@@ -174,32 +185,36 @@ router.put('/:userId/account', requireAuth, requireSelf, async (req, res, next) 
 });
 
 // US-12: Pause the profile for a defined period. Accepts either a number of
-// `days` (1–365) or an explicit future `pausedUntil` ISO timestamp. The profile
+// `days` (1–365) or explicit pausedFrom and pausedUntil ISO timestamps. The profile
 // is hidden from matching until then and reactivates automatically afterwards.
 router.put('/:userId/pause', requireAuth, requireSelf, async (req, res, next) => {
   try {
-    const { days, pausedUntil } = req.body || {};
+    const { days, pausedFrom, pausedUntil } = req.body || {};
+    let from;
     let until;
 
-    if (days != null) {
+    if (pausedFrom != null && pausedUntil != null) {
+      from = new Date(pausedFrom);
+      until = new Date(pausedUntil);
+      if (Number.isNaN(from.getTime()) || Number.isNaN(until.getTime())) {
+        return res.status(400).json({ error: 'Start- und Enddatum müssen gültige Daten sein.' });
+      }
+      if (until.getTime() <= from.getTime()) {
+        return res.status(400).json({ error: 'Das Enddatum muss nach dem Startdatum liegen.' });
+      }
+    } else if (days != null) {
       if (!Number.isInteger(days) || days < 1 || days > 365) {
         return res.status(400).json({ error: 'days must be an integer between 1 and 365' });
       }
+      from = new Date();
       until = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-    } else if (pausedUntil != null) {
-      until = new Date(pausedUntil);
-      if (Number.isNaN(until.getTime())) {
-        return res.status(400).json({ error: 'pausedUntil must be a valid date' });
-      }
-      if (until.getTime() <= Date.now()) {
-        return res.status(400).json({ error: 'pausedUntil must be in the future' });
-      }
     } else {
-      return res.status(400).json({ error: 'Provide either days or pausedUntil' });
+      return res.status(400).json({ error: 'Bitte Start- und Enddatum oder Anzahl Tage angeben.' });
     }
 
     const updated = await updateUser(req.params.userId, (u) => ({
       ...u,
+      pausedFrom: from.toISOString(),
       pausedUntil: until.toISOString()
     }));
     return res.json({ user: publicUser(updated) });
@@ -212,7 +227,11 @@ router.put('/:userId/pause', requireAuth, requireSelf, async (req, res, next) =>
 // Resume early — clear a running pause before it expires (US-12).
 router.delete('/:userId/pause', requireAuth, requireSelf, async (req, res, next) => {
   try {
-    const updated = await updateUser(req.params.userId, (u) => ({ ...u, pausedUntil: null }));
+    const updated = await updateUser(req.params.userId, (u) => ({
+      ...u,
+      pausedFrom: null,
+      pausedUntil: null
+    }));
     return res.json({ user: publicUser(updated) });
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
@@ -259,11 +278,23 @@ router.delete('/:userId/block/:targetId', requireAuth, requireSelf, async (req, 
 router.delete('/:userId', requireAuth, requireSelf, async (req, res, next) => {
   try {
     const id = req.params.userId;
-    const result = await updateDb((db) => {
-      if (!db.users.some((u) => u.id === id)) {
-        return { status: 404, error: 'User not found' };
-      }
+    const { password } = req.body || {};
+    if (!password) {
+      return res.status(400).json({ error: 'Passwort ist erforderlich, um Ihr Konto zu löschen.' });
+    }
 
+    const db = await readDb();
+    const user = db.users.find((u) => u.id === id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Ungültiges Passwort. Löschung abgebrochen.' });
+    }
+
+    const result = await updateDb((db) => {
       const theirConnectionIds = new Set(
         db.connections
           .filter((c) => c.requesterId === id || c.recipientId === id)
@@ -285,6 +316,36 @@ router.delete('/:userId', requireAuth, requireSelf, async (req, res, next) => {
     if (result.error) return res.status(result.status).json({ error: result.error });
     return res.status(204).end();
   } catch (err) {
+    return next(err);
+  }
+});
+
+// Admin-only endpoints
+
+// PUT /api/users/:userId/lock - Lock user profile (Admin only)
+router.put('/:userId/lock', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const updated = await updateUser(req.params.userId, (u) => ({
+      ...u,
+      status: 'locked'
+    }));
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// PUT /api/users/:userId/unlock - Unlock user profile (Admin only)
+router.put('/:userId/unlock', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const updated = await updateUser(req.params.userId, (u) => ({
+      ...u,
+      status: 'active'
+    }));
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
     return next(err);
   }
 });

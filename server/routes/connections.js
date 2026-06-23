@@ -78,6 +78,9 @@ router.post('/', requireAuth, async (req, res, next) => {
       if (!recipient || !recipient.profile || !isActive(recipient)) {
         return { status: 404, error: 'Recipient not found' };
       }
+      if (me.status === 'locked' && !recipient.isAdmin) {
+        return { status: 403, error: 'Ihr Profil ist gesperrt. Sie können nur den Administrator kontaktieren.' };
+      }
       if (isBlockedBetween(me, recipient)) {
         return { status: 403, error: 'You cannot contact this user' };
       }
@@ -217,6 +220,16 @@ router.post('/:id/messages', requireAuth, async (req, res, next) => {
       if (!connection || !isParticipant(connection, req.user.id)) {
         return { status: 404, error: 'Connection not found' };
       }
+
+      const me = userById(db, req.user.id);
+      if (me.status === 'locked') {
+        const partnerId = otherParticipantId(connection, req.user.id);
+        const partner = userById(db, partnerId);
+        if (!partner || !partner.isAdmin) {
+          return { status: 403, error: 'Ihr Profil ist gesperrt. Sie können nur den Administrator kontaktieren.' };
+        }
+      }
+
       if (connection.status !== 'accepted') {
         return { status: 403, error: 'Chat is only available after the request is accepted' };
       }
@@ -235,6 +248,46 @@ router.post('/:id/messages', requireAuth, async (req, res, next) => {
         fromMe: true
       }
     });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// POST /api/connections/contact-admin - Create or fetch a support chat with Admin
+router.post('/contact-admin', requireAuth, async (req, res, next) => {
+  try {
+    const result = await updateDb((db) => {
+      const me = userById(db, req.user.id);
+      if (!me) return { status: 404, error: 'User not found' };
+
+      // Find the first admin
+      const admin = db.users.find((u) => u.isAdmin);
+      if (!admin) {
+        return { status: 404, error: 'Administrator nicht im System registriert.' };
+      }
+
+      // Check if connection already exists
+      let conn = connectionBetween(db, me.id, admin.id);
+      if (!conn) {
+        conn = newConnection({ requesterId: me.id, recipientId: admin.id });
+        conn.status = 'accepted'; // support chat accepted immediately
+        db.connections.push(conn);
+
+        // System greeting from Admin
+        const welcome = newMessage({
+          connectionId: conn.id,
+          senderId: admin.id,
+          body: 'Hallo! Ihr Profil wurde gesperrt. Bitte beschreiben Sie Ihr Anliegen hier, damit wir die Sperre überprüfen können.'
+        });
+        db.messages.push(welcome);
+      }
+      return { connection: conn };
+    });
+
+    if (result.error) return res.status(result.status).json({ error: result.error });
+
+    const db = await readDb();
+    return res.json({ connection: serializeConnection(db, result.connection, req.user.id) });
   } catch (err) {
     return next(err);
   }

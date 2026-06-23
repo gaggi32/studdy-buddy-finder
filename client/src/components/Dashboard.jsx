@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { profileApi } from '../api.js';
+import { profileApi, connectionApi } from '../api.js';
 import Toast from './Toast.jsx';
 
 const LEVEL_CLASS = {
@@ -13,16 +13,21 @@ const LEVEL_CLASS = {
 const ROLE_LABEL = { seeking: 'Looking for help', offering: 'Offering help' };
 const ROLE_CLASS = { seeking: 'role-seeking', offering: 'role-offering' };
 
-const PAUSE_OPTIONS = [
-  { days: 7, label: '1 week' },
-  { days: 14, label: '2 weeks' },
-  { days: 30, label: '1 month' }
-];
-
 // US-11/US-12: the effective visibility state derived from the user record.
 function accountState(user) {
+  if (user.status === 'locked') return 'locked';
   if (user.status === 'deactivated') return 'deactivated';
-  if (user.pausedUntil && new Date(user.pausedUntil).getTime() > Date.now()) return 'paused';
+  
+  const now = Date.now();
+  if (user.pausedFrom && user.pausedUntil) {
+    const from = new Date(user.pausedFrom).getTime();
+    const until = new Date(user.pausedUntil).getTime();
+    if (!Number.isNaN(from) && !Number.isNaN(until) && now >= from && now <= until) {
+      return 'paused';
+    }
+  } else if (user.pausedUntil && new Date(user.pausedUntil).getTime() > now) {
+    return 'paused';
+  }
   return 'active';
 }
 
@@ -32,13 +37,19 @@ function formatDate(iso) {
   });
 }
 
-// Account visibility controls: one-click deactivate/reactivate (US-11) and a
-// timed pause that auto-reactivates (US-12).
+// Account visibility controls: one-click deactivate/reactivate (US-11), a
+// timed pause that auto-reactivates (US-12), and lock display (US-14).
 function AccountStatus({ user, setUser }) {
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [pauseDays, setPauseDays] = useState(7);
   const [toast, setToast] = useState('');
+  
+  // Date inputs for custom pause
+  const todayStr = new Date().toISOString().split('T')[0];
+  const tomorrowStr = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const [pauseStart, setPauseStart] = useState(todayStr);
+  const [pauseEnd, setPauseEnd] = useState(tomorrowStr);
 
   const state = accountState(user);
 
@@ -56,15 +67,32 @@ function AccountStatus({ user, setUser }) {
     }
   }
 
+  async function handleContactAdmin() {
+    setBusy(true);
+    setError('');
+    try {
+      const conn = await connectionApi.contactAdmin();
+      navigate(`/messages/${conn.id}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const META = {
-    active: { dot: 'ok', title: 'Profile active', sub: "You're visible to other students and can receive requests." },
+    active: { dot: 'ok', title: 'Profil aktiv', sub: "Sie sind für andere Studenten sichtbar und können Match-Anfragen erhalten." },
     paused: {
       dot: 'warn',
-      title: 'Profile paused',
-      sub: `Hidden from matches until ${user.pausedUntil ? formatDate(user.pausedUntil) : ''}. It reactivates automatically.`
+      title: 'Profil pausiert',
+      sub: `Unsichtbar in Matches bis ${user.pausedUntil ? formatDate(user.pausedUntil) : ''}. Das Profil reaktiviert sich danach automatisch.`
     },
-    deactivated: { dot: 'off', title: 'Profile deactivated', sub: "You're hidden from everyone's matches until you reactivate." }
+    deactivated: { dot: 'off', title: 'Profil deaktiviert', sub: "Sie sind ausgeblendet. Klicken Sie auf Reaktivieren, um wieder online zu gehen." },
+    locked: { dot: 'off', title: 'Profil gesperrt', sub: "Ihr Profil wurde gesperrt. Matches sind deaktiviert und Sie können keine neuen Nachrichten senden." }
   }[state];
+
+  // Check if there is a future pause scheduled (now is before pauseStart)
+  const hasFuturePause = !busy && state === 'active' && user.pausedFrom && user.pausedUntil && new Date(user.pausedFrom).getTime() > Date.now();
 
   return (
     <div className="card account-status">
@@ -79,50 +107,106 @@ function AccountStatus({ user, setUser }) {
 
       {error && <div className="error-banner" style={{ marginTop: 12 }}>⚠ {error}</div>}
 
-      <div className="account-status-actions">
+      <div className="account-status-actions" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 14 }}>
         {state === 'active' && (
-          <>
-            <div className="pause-control">
-              <select
-                value={pauseDays}
-                disabled={busy}
-                onChange={(e) => setPauseDays(Number(e.target.value))}
-              >
-                {PAUSE_OPTIONS.map((o) => (
-                  <option key={o.days} value={o.days}>{o.label}</option>
-                ))}
-              </select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+            {/* Pause Inputs */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              background: 'var(--surface2)',
+              padding: '14px 18px',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--border)',
+              width: '100%',
+              maxWidth: '460px'
+            }}>
+              <strong style={{ fontSize: '0.85rem' }}>Profil pausieren (Start- & Enddatum)</strong>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
+                <div className="field" style={{ marginBottom: 0, flex: 1, minWidth: '120px' }}>
+                  <label className="field-label" style={{ fontSize: '0.7rem' }}>Startdatum</label>
+                  <input
+                    type="date"
+                    value={pauseStart}
+                    min={todayStr}
+                    onChange={(e) => setPauseStart(e.target.value)}
+                    disabled={busy}
+                    style={{ padding: '6px 10px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div className="field" style={{ marginBottom: 0, flex: 1, minWidth: '120px' }}>
+                  <label className="field-label" style={{ fontSize: '0.7rem' }}>Enddatum</label>
+                  <input
+                    type="date"
+                    value={pauseEnd}
+                    min={pauseStart || todayStr}
+                    onChange={(e) => setPauseEnd(e.target.value)}
+                    disabled={busy}
+                    style={{ padding: '6px 10px', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
               <button
                 className="btn btn-ghost btn-sm"
-                disabled={busy}
+                disabled={busy || !pauseStart || !pauseEnd}
                 onClick={() => run(
-                  () => profileApi.pauseProfile(user.id, pauseDays),
-                  'Profile paused'
+                  () => profileApi.pauseProfile(user.id, null, pauseStart, pauseEnd),
+                  'Pause erfolgreich eingerichtet.'
                 )}
+                style={{ marginTop: 8, width: 'max-content' }}
               >
-                ⏸ Pause
+                ⏸ Pause aktivieren
               </button>
             </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                className="btn btn-danger-ghost btn-sm"
+                disabled={busy}
+                onClick={() => run(
+                  () => profileApi.setAccountStatus(user.id, 'deactivated'),
+                  'Profil erfolgreich deaktiviert.'
+                )}
+              >
+                Deaktivieren
+              </button>
+            </div>
+          </div>
+        )}
+
+        {hasFuturePause && (
+          <div style={{
+            marginTop: 12,
+            padding: '12px 16px',
+            background: 'var(--accent-dim)',
+            borderRadius: 'var(--radius)',
+            border: '1px solid #6366f130',
+            width: '100%',
+            maxWidth: '460px'
+          }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-h)' }}>Geplante Pause:</div>
+            <div className="muted" style={{ fontSize: '0.8rem', marginTop: 2 }}>
+              Von {formatDate(user.pausedFrom)} bis {formatDate(user.pausedUntil)}
+            </div>
             <button
-              className="btn btn-danger-ghost btn-sm"
+              className="btn btn-ghost btn-sm"
+              style={{ marginTop: 8, padding: '4px 10px', fontSize: '0.75rem' }}
               disabled={busy}
-              onClick={() => run(
-                () => profileApi.setAccountStatus(user.id, 'deactivated'),
-                'Profile deactivated'
-              )}
+              onClick={() => run(() => profileApi.resumeProfile(user.id), 'Geplante Pause storniert.')}
             >
-              Deactivate
+              Pause stornieren
             </button>
-          </>
+          </div>
         )}
 
         {state === 'paused' && (
           <button
             className="btn btn-primary btn-sm"
             disabled={busy}
-            onClick={() => run(() => profileApi.resumeProfile(user.id), 'Welcome back — profile active')}
+            onClick={() => run(() => profileApi.resumeProfile(user.id), 'Welcome back — Profil aktiv')}
           >
-            ▶ Resume now
+            ▶ Pause beenden (Jetzt reaktivieren)
           </button>
         )}
 
@@ -130,9 +214,19 @@ function AccountStatus({ user, setUser }) {
           <button
             className="btn btn-primary btn-sm"
             disabled={busy}
-            onClick={() => run(() => profileApi.setAccountStatus(user.id, 'active'), 'Profile reactivated')}
+            onClick={() => run(() => profileApi.setAccountStatus(user.id, 'active'), 'Profil reaktiviert.')}
           >
-            ▶ Reactivate
+            ▶ Jetzt reaktivieren
+          </button>
+        )}
+
+        {state === 'locked' && (
+          <button
+            className="btn btn-danger btn-sm"
+            disabled={busy}
+            onClick={handleContactAdmin}
+          >
+            💬 Support kontaktieren
           </button>
         )}
       </div>
@@ -165,6 +259,7 @@ export default function Dashboard() {
 
   const p = user.profile;
   const firstName = p?.firstName ?? '';
+  const isLocked = user.status === 'locked';
 
   return (
     <div className="page-wrap">
@@ -173,51 +268,75 @@ export default function Dashboard() {
       <div className="dashboard-hero">
         <div>
           <h1>{firstName ? `Hey, ${firstName} 👋` : 'Welcome 👋'}</h1>
-          <p className="muted">Here's your study profile at a glance.</p>
+          <p className="muted">Hier ist Ihr StudyBuddy-Profil im Überblick.</p>
         </div>
         <button className="btn btn-ghost" onClick={() => navigate('/profile/edit')}>
-          Edit profile
+          Profil bearbeiten
         </button>
       </div>
 
-      {/* US-11 / US-12: account visibility status & controls */}
+      {/* Account status */}
       <AccountStatus user={user} setUser={setUser} />
 
-      {/* Quick actions */}
-      <div className="quick-actions">
-        <button className="quick-action" onClick={() => navigate('/matches')}>
-          <span className="quick-action-icon">🔍</span>
-          <span>
-            <span className="quick-action-title">Find study partners</span>
-            <span className="quick-action-sub">See students who match your subjects & times</span>
-          </span>
-        </button>
-        <button className="quick-action" onClick={() => navigate('/messages')}>
-          <span className="quick-action-icon">💬</span>
-          <span>
-            <span className="quick-action-title">Messages</span>
-            <span className="quick-action-sub">Requests and your private chats</span>
-          </span>
-        </button>
-      </div>
+      {/* Locked Alert Card */}
+      {isLocked && (
+        <div className="card" style={{ borderLeft: '4px solid var(--danger)', background: 'var(--danger-bg)', padding: '20px 24px' }}>
+          <h2 style={{ color: 'var(--danger)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>⚠️ Konto gesperrt</span>
+          </h2>
+          <p className="muted" style={{ color: 'var(--text)', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: 12 }}>
+            Ihr Profil wurde aufgrund von Richtlinienverstößen gesperrt. Matches sind deaktiviert und Sie können keine neuen Nachrichten an andere Benutzer senden. Sie können sich jedoch weiterhin mit dem Administrator austauschen.
+          </p>
+          <button className="btn btn-danger" onClick={async () => {
+            try {
+              const conn = await connectionApi.contactAdmin();
+              navigate(`/messages/${conn.id}`);
+            } catch (err) {
+              alert(err.message);
+            }
+          }}>
+            Administrator kontaktieren
+          </button>
+        </div>
+      )}
+
+      {/* Quick actions - blocked if locked */}
+      {!isLocked && (
+        <div className="quick-actions">
+          <button className="quick-action" onClick={() => navigate('/matches')}>
+            <span className="quick-action-icon">🔍</span>
+            <span>
+              <span className="quick-action-title">Lernpartner finden</span>
+              <span className="quick-action-sub">Profile ansehen, die zu Ihren Fächern passen</span>
+            </span>
+          </button>
+          <button className="quick-action" onClick={() => navigate('/messages')}>
+            <span className="quick-action-icon">💬</span>
+            <span>
+              <span className="quick-action-title">Nachrichten</span>
+              <span className="quick-action-sub">Ihre Kontakte und Chats einsehen</span>
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Basic profile */}
       <div className="card">
         <div className="card-header">
-          <span className="card-title"><span className="card-title-icon">👤</span> Profile</span>
+          <span className="card-title"><span className="card-title-icon">👤</span> Steckbrief</span>
         </div>
         {p ? (
           <div className="info-grid">
             <div className="info-item">
-              <div className="info-label">Full name</div>
+              <div className="info-label">Name</div>
               <div className="info-value">{p.firstName} {p.lastName}</div>
             </div>
             <div className="info-item">
-              <div className="info-label">University</div>
+              <div className="info-label">Universität</div>
               <div className="info-value">{p.university || <span style={{ color: 'var(--text-dim)' }}>—</span>}</div>
             </div>
             <div className="info-item">
-              <div className="info-label">Study program</div>
+              <div className="info-label">Studiengang</div>
               <div className="info-value">{p.studyProgram || <span style={{ color: 'var(--text-dim)' }}>—</span>}</div>
             </div>
             <div className="info-item">
@@ -226,16 +345,16 @@ export default function Dashboard() {
             </div>
             {p.bio && (
               <div className="info-item" style={{ gridColumn: '1 / -1' }}>
-                <div className="info-label">Bio</div>
+                <div className="info-label">Über mich</div>
                 <div className="info-value">{p.bio}</div>
               </div>
             )}
           </div>
         ) : (
           <div className="empty-state">
-            No profile yet.{' '}
+            Noch kein Steckbrief angelegt.{' '}
             <button className="btn btn-ghost btn-sm" onClick={() => navigate('/onboarding')}>
-              Complete setup
+              Jetzt einrichten
             </button>
           </div>
         )}
@@ -244,7 +363,7 @@ export default function Dashboard() {
       {/* Subjects */}
       <div className="card">
         <div className="card-header">
-          <span className="card-title"><span className="card-title-icon">📖</span> Subjects</span>
+          <span className="card-title"><span className="card-title-icon">📖</span> Fächer</span>
         </div>
         {user.subjects?.length ? (
           <div className="subject-list">
@@ -260,7 +379,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="empty-state">No subjects added yet.</div>
+          <div className="empty-state">Keine Fächer eingetragen.</div>
         )}
       </div>
 
@@ -268,7 +387,7 @@ export default function Dashboard() {
       {user.learningGoals?.length > 0 && (
         <div className="card">
           <div className="card-header">
-            <span className="card-title"><span className="card-title-icon">🎯</span> Learning goals</span>
+            <span className="card-title"><span className="card-title-icon">🎯</span> Lernziele</span>
           </div>
           <div className="chip-list">
             {user.learningGoals.map((g, i) => (
@@ -281,7 +400,7 @@ export default function Dashboard() {
       {/* Availability */}
       <div className="card">
         <div className="card-header">
-          <span className="card-title"><span className="card-title-icon">🗓</span> Availability</span>
+          <span className="card-title"><span className="card-title-icon">🗓</span> Lernzeiten</span>
         </div>
         {user.availability?.length ? (
           <div className="schedule-grid">
@@ -293,7 +412,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="empty-state">No time slots added yet.</div>
+          <div className="empty-state">Keine Zeiten eingetragen.</div>
         )}
       </div>
 

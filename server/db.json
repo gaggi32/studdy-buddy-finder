@@ -1,6 +1,26 @@
 {
   "users": [
     {
+      "id": "admin-user-id-999",
+      "email": "admin@studybuddy.com",
+      "passwordHash": "$2a$10$yFa/dxA9Vq.RqLzWIyMgrefx01N5egF7h.B1emyPFizxsJq2.d9Bu",
+      "createdAt": "2026-06-23T09:40:00.000Z",
+      "status": "active",
+      "isAdmin": true,
+      "profile": {
+        "firstName": "Admin",
+        "lastName": "User",
+        "university": "StudyBuddy",
+        "studyProgram": "Administration",
+        "semester": 1,
+        "bio": "System Administrator",
+        "updatedAt": "2026-06-23T09:40:00.000Z"
+      },
+      "subjects": [],
+      "learningGoals": [],
+      "availability": []
+    },
+    {
       "id": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
       "email": "test@email.com",
       "passwordHash": "$2a$10$ldZv7sh9oy6aVzx3K5FrMuEvVqYjRhYHdsbpuyWu9M7UNf6j769pW",
@@ -45,7 +65,10 @@
           "startTime": "18:00",
           "endTime": "20:00"
         }
-      ]
+      ],
+      "pausedUntil": null,
+      "resetToken": "801fb6dd-1c71-4647-bb95-9e6614227405",
+      "resetExpires": "2026-06-24T08:02:30.185Z"
     },
     {
       "id": "c928971d-394a-457d-bbbf-d3103cd3fad8",
@@ -757,6 +780,14 @@
       "status": "pending",
       "createdAt": "2026-06-16T09:05:39.083Z",
       "updatedAt": "2026-06-16T09:05:39.083Z"
+    },
+    {
+      "id": "83d47a71-42bc-490f-be39-24ca07e6622a",
+      "requesterId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "recipientId": "admin-user-id-999",
+      "status": "accepted",
+      "createdAt": "2026-06-23T08:04:56.784Z",
+      "updatedAt": "2026-06-23T08:06:58.720Z"
     }
   ],
   "messages": [
@@ -808,6 +839,34 @@
       "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
       "body": "asdawdw",
       "createdAt": "2026-06-16T09:39:32.814Z"
+    },
+    {
+      "id": "c1e9813d-a62d-4813-a391-ea8c885c9ab0",
+      "connectionId": "83d47a71-42bc-490f-be39-24ca07e6622a",
+      "senderId": "admin-user-id-999",
+      "body": "Hallo! Ihr Profil wurde gesperrt. Bitte beschreiben Sie Ihr Anliegen hier, damit wir die Sperre überprüfen können.",
+      "createdAt": "2026-06-23T08:04:56.785Z"
+    },
+    {
+      "id": "693a9d06-e24c-43ca-874f-8836ac94ba3c",
+      "connectionId": "83d47a71-42bc-490f-be39-24ca07e6622a",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "gib mir mis konto zrugg du bastard",
+      "createdAt": "2026-06-23T08:05:06.124Z"
+    },
+    {
+      "id": "de7f3a93-f05d-46fc-b29a-0143e3b54289",
+      "connectionId": "83d47a71-42bc-490f-be39-24ca07e6622a",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "schlampe",
+      "createdAt": "2026-06-23T08:06:54.210Z"
+    },
+    {
+      "id": "3311a297-9e2f-4a51-8f26-577f10808377",
+      "connectionId": "83d47a71-42bc-490f-be39-24ca07e6622a",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "nuttensohn",
+      "createdAt": "2026-06-23T08:06:58.720Z"
     }
   ]
 }
