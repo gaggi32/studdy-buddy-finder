@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { createBrowserRouter, Outlet, Navigate, Link, NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { createBrowserRouter, Outlet, Navigate, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Register from './components/Register.jsx';
 import Login from './components/Login.jsx';
@@ -36,6 +36,80 @@ function HomeRedirect() {
 function RootLayout() {
   const { user, setUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [notifiedMsgIds, setNotifiedMsgIds] = useState(new Set());
+  const [incomingToast, setIncomingToast] = useState('');
+  const [incomingToastConnId, setIncomingToastConnId] = useState(null);
+
+  // US-16: Request desktop notification permission on mount/login
+  useEffect(() => {
+    if (user && typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  }, [user]);
+
+  // US-16: Poll connections list and trigger notifications on new incoming messages
+  useEffect(() => {
+    if (!user) return;
+
+    let isFirstLoad = true;
+    let pollInterval;
+
+    async function checkNewMessages() {
+      try {
+        const data = await connectionApi.list();
+        setNotifiedMsgIds((prev) => {
+          const next = new Set(prev);
+          for (const conn of data) {
+            if (conn.lastMessage) {
+              const msgId = conn.lastMessage.id;
+              if (isFirstLoad) {
+                // Seed existing messages to avoid spamming historical notifications
+                next.add(msgId);
+              } else if (!next.has(msgId)) {
+                next.add(msgId);
+                // Trigger notification if not from me, and not currently on this chat screen
+                const currentChatPath = `/messages/${conn.id}`;
+                if (!conn.lastMessage.fromMe && location.pathname !== currentChatPath) {
+                  const sender = conn.partnerName || 'Study Buddy';
+                  console.log(`[Notification] Triggered notification for new message from: ${sender}`);
+
+                  // In-app fallback toast
+                  setIncomingToast(`Neue Nachricht von ${sender}`);
+                  setIncomingToastConnId(conn.id);
+
+                  // Desktop notification
+                  if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                    const n = new Notification('Neue Nachricht', {
+                      body: `Neue Nachricht von ${sender}`,
+                      tag: conn.id // Group notifications from the same connection
+                    });
+                    n.onclick = () => {
+                      navigate(`/messages/${conn.id}`);
+                      window.focus();
+                    };
+                  }
+                }
+              }
+            }
+          }
+          return next;
+        });
+        isFirstLoad = false;
+      } catch (err) {
+        console.error('Error checking notifications:', err);
+      }
+    }
+
+    checkNewMessages();
+    pollInterval = setInterval(checkNewMessages, 4000);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [user?.id, location.pathname, navigate]);
 
   // Sync user status from server on mount/reload
   useEffect(() => {
@@ -94,6 +168,38 @@ function RootLayout() {
           </div>
         )}
       </nav>
+
+      {incomingToast && (
+        <div className="toast toast-success" style={{
+          position: 'fixed',
+          top: '70px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 300,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }} onClick={() => {
+          navigate(`/messages/${incomingToastConnId}`);
+          setIncomingToast('');
+        }}>
+          <span>💬 {incomingToast} (Klicken zum Öffnen)</span>
+          <button style={{
+            background: 'none',
+            border: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            padding: '2px 6px',
+            marginLeft: '8px'
+          }} onClick={(e) => {
+            e.stopPropagation();
+            setIncomingToast('');
+          }}>✕</button>
+        </div>
+      )}
 
       {user && user.status === 'locked' && (
         <div style={{

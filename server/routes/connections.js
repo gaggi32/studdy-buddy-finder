@@ -39,7 +39,7 @@ function serializeConnection(db, connection, meId) {
     anonymized: !revealFull,
     messageCount: msgs.length,
     lastMessage: last
-      ? { body: last.body, createdAt: last.createdAt, fromMe: last.senderId === meId }
+      ? { id: last.id, body: last.body, createdAt: last.createdAt, fromMe: last.senderId === meId }
       : null,
     createdAt: connection.createdAt,
     updatedAt: connection.updatedAt
