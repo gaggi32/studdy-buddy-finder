@@ -1,5 +1,5 @@
 const express = require('express');
-const { readDb, updateUser } = require('../utils/fileDb');
+const { readDb, updateUser, updateDb } = require('../utils/fileDb');
 const { requireAuth, requireSelf } = require('../middleware/auth');
 
 const router = express.Router();
@@ -151,15 +151,68 @@ router.put('/:userId/availability', requireAuth, requireSelf, async (req, res, n
   }
 });
 
-// US-10: Activate / deactivate the account. Deactivated profiles are hidden
-// from everyone's matching list (US-06) but the owner can still log in.
+// US-11: Activate / deactivate the account with a single call. Deactivated
+// profiles are hidden from everyone's matching list (US-06) and receive no new
+// requests, but the owner can still log in and reactivate any time.
 router.put('/:userId/account', requireAuth, requireSelf, async (req, res, next) => {
   try {
     const { status } = req.body || {};
     if (status !== 'active' && status !== 'deactivated') {
       return res.status(400).json({ error: "status must be 'active' or 'deactivated'" });
     }
-    const updated = await updateUser(req.params.userId, (u) => ({ ...u, status }));
+    // Reactivating also clears any running pause so the two states can't conflict.
+    const updated = await updateUser(req.params.userId, (u) => ({
+      ...u,
+      status,
+      pausedUntil: status === 'active' ? null : u.pausedUntil
+    }));
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// US-12: Pause the profile for a defined period. Accepts either a number of
+// `days` (1–365) or an explicit future `pausedUntil` ISO timestamp. The profile
+// is hidden from matching until then and reactivates automatically afterwards.
+router.put('/:userId/pause', requireAuth, requireSelf, async (req, res, next) => {
+  try {
+    const { days, pausedUntil } = req.body || {};
+    let until;
+
+    if (days != null) {
+      if (!Number.isInteger(days) || days < 1 || days > 365) {
+        return res.status(400).json({ error: 'days must be an integer between 1 and 365' });
+      }
+      until = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    } else if (pausedUntil != null) {
+      until = new Date(pausedUntil);
+      if (Number.isNaN(until.getTime())) {
+        return res.status(400).json({ error: 'pausedUntil must be a valid date' });
+      }
+      if (until.getTime() <= Date.now()) {
+        return res.status(400).json({ error: 'pausedUntil must be in the future' });
+      }
+    } else {
+      return res.status(400).json({ error: 'Provide either days or pausedUntil' });
+    }
+
+    const updated = await updateUser(req.params.userId, (u) => ({
+      ...u,
+      pausedUntil: until.toISOString()
+    }));
+    return res.json({ user: publicUser(updated) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// Resume early — clear a running pause before it expires (US-12).
+router.delete('/:userId/pause', requireAuth, requireSelf, async (req, res, next) => {
+  try {
+    const updated = await updateUser(req.params.userId, (u) => ({ ...u, pausedUntil: null }));
     return res.json({ user: publicUser(updated) });
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
@@ -196,6 +249,42 @@ router.delete('/:userId/block/:targetId', requireAuth, requireSelf, async (req, 
     return res.json({ user: publicUser(updated) });
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
+    return next(err);
+  }
+});
+
+// US-13: Permanently delete the account and every trace of it — the user record,
+// all connections they were part of, the messages in those connections, and any
+// references to them in other users' block lists.
+router.delete('/:userId', requireAuth, requireSelf, async (req, res, next) => {
+  try {
+    const id = req.params.userId;
+    const result = await updateDb((db) => {
+      if (!db.users.some((u) => u.id === id)) {
+        return { status: 404, error: 'User not found' };
+      }
+
+      const theirConnectionIds = new Set(
+        db.connections
+          .filter((c) => c.requesterId === id || c.recipientId === id)
+          .map((c) => c.id)
+      );
+
+      db.messages = db.messages.filter((m) => !theirConnectionIds.has(m.connectionId));
+      db.connections = db.connections.filter((c) => !theirConnectionIds.has(c.id));
+      db.users = db.users
+        .filter((u) => u.id !== id)
+        .map((u) =>
+          Array.isArray(u.blockedUserIds) && u.blockedUserIds.includes(id)
+            ? { ...u, blockedUserIds: u.blockedUserIds.filter((bid) => bid !== id) }
+            : u
+        );
+      return {};
+    });
+
+    if (result.error) return res.status(result.status).json({ error: result.error });
+    return res.status(204).end();
+  } catch (err) {
     return next(err);
   }
 });

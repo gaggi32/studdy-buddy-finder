@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { profileApi } from '../api.js';
+import Toast from './Toast.jsx';
 
 const LEVEL_CLASS = {
   beginner: 'level-beginner',
@@ -11,6 +12,133 @@ const LEVEL_CLASS = {
 
 const ROLE_LABEL = { seeking: 'Looking for help', offering: 'Offering help' };
 const ROLE_CLASS = { seeking: 'role-seeking', offering: 'role-offering' };
+
+const PAUSE_OPTIONS = [
+  { days: 7, label: '1 week' },
+  { days: 14, label: '2 weeks' },
+  { days: 30, label: '1 month' }
+];
+
+// US-11/US-12: the effective visibility state derived from the user record.
+function accountState(user) {
+  if (user.status === 'deactivated') return 'deactivated';
+  if (user.pausedUntil && new Date(user.pausedUntil).getTime() > Date.now()) return 'paused';
+  return 'active';
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString(undefined, {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+  });
+}
+
+// Account visibility controls: one-click deactivate/reactivate (US-11) and a
+// timed pause that auto-reactivates (US-12).
+function AccountStatus({ user, setUser }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [pauseDays, setPauseDays] = useState(7);
+  const [toast, setToast] = useState('');
+
+  const state = accountState(user);
+
+  async function run(action, successMsg) {
+    setBusy(true);
+    setError('');
+    try {
+      const updated = await action();
+      setUser(updated);
+      setToast(successMsg);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const META = {
+    active: { dot: 'ok', title: 'Profile active', sub: "You're visible to other students and can receive requests." },
+    paused: {
+      dot: 'warn',
+      title: 'Profile paused',
+      sub: `Hidden from matches until ${user.pausedUntil ? formatDate(user.pausedUntil) : ''}. It reactivates automatically.`
+    },
+    deactivated: { dot: 'off', title: 'Profile deactivated', sub: "You're hidden from everyone's matches until you reactivate." }
+  }[state];
+
+  return (
+    <div className="card account-status">
+      <Toast message={toast} onDone={() => setToast('')} />
+      <div className="account-status-head">
+        <span className={`status-dot status-dot-${META.dot}`} />
+        <div>
+          <div className="account-status-title">{META.title}</div>
+          <div className="muted" style={{ fontSize: '.82rem' }}>{META.sub}</div>
+        </div>
+      </div>
+
+      {error && <div className="error-banner" style={{ marginTop: 12 }}>⚠ {error}</div>}
+
+      <div className="account-status-actions">
+        {state === 'active' && (
+          <>
+            <div className="pause-control">
+              <select
+                value={pauseDays}
+                disabled={busy}
+                onChange={(e) => setPauseDays(Number(e.target.value))}
+              >
+                {PAUSE_OPTIONS.map((o) => (
+                  <option key={o.days} value={o.days}>{o.label}</option>
+                ))}
+              </select>
+              <button
+                className="btn btn-ghost btn-sm"
+                disabled={busy}
+                onClick={() => run(
+                  () => profileApi.pauseProfile(user.id, pauseDays),
+                  'Profile paused'
+                )}
+              >
+                ⏸ Pause
+              </button>
+            </div>
+            <button
+              className="btn btn-danger-ghost btn-sm"
+              disabled={busy}
+              onClick={() => run(
+                () => profileApi.setAccountStatus(user.id, 'deactivated'),
+                'Profile deactivated'
+              )}
+            >
+              Deactivate
+            </button>
+          </>
+        )}
+
+        {state === 'paused' && (
+          <button
+            className="btn btn-primary btn-sm"
+            disabled={busy}
+            onClick={() => run(() => profileApi.resumeProfile(user.id), 'Welcome back — profile active')}
+          >
+            ▶ Resume now
+          </button>
+        )}
+
+        {state === 'deactivated' && (
+          <button
+            className="btn btn-primary btn-sm"
+            disabled={busy}
+            onClick={() => run(() => profileApi.setAccountStatus(user.id, 'active'), 'Profile reactivated')}
+          >
+            ▶ Reactivate
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user, setUser } = useAuth();
@@ -51,6 +179,9 @@ export default function Dashboard() {
           Edit profile
         </button>
       </div>
+
+      {/* US-11 / US-12: account visibility status & controls */}
+      <AccountStatus user={user} setUser={setUser} />
 
       {/* Quick actions */}
       <div className="quick-actions">

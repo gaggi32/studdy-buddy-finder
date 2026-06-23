@@ -32,7 +32,7 @@ function stateFromUser(u) {
 }
 
 export default function EditProfile() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState(() => stateFromUser(user));
@@ -41,6 +41,8 @@ export default function EditProfile() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Pull the freshest record on mount so we never edit stale data.
   useEffect(() => {
@@ -58,8 +60,28 @@ export default function EditProfile() {
 
   const dirty = useMemo(() => JSON.stringify(form) !== baseline, [form, baseline]);
 
-  // US-10: warn on navigation while there are unsaved changes.
-  useUnsavedChanges(dirty);
+  // US-10: warn on navigation while there are unsaved changes. Suppressed once a
+  // delete is underway so the "discard changes?" prompt can't block the redirect.
+  useUnsavedChanges(dirty && !deleting);
+
+  // US-13: after the account is deleted, leave the app and clear the session.
+  useEffect(() => {
+    if (!deleting) return;
+    navigate('/register', { replace: true });
+    logout();
+  }, [deleting, navigate, logout]);
+
+  async function handleDelete() {
+    setError('');
+    try {
+      await profileApi.deleteAccount(user.id);
+      setConfirmDelete(false);
+      setDeleting(true); // triggers the redirect + logout effect above
+    } catch (err) {
+      setError(err.message);
+      setConfirmDelete(false);
+    }
+  }
 
   function setField(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -320,6 +342,24 @@ export default function EditProfile() {
               </span>
             </span>
           </label>
+
+          {/* US-13: permanent account deletion */}
+          <hr className="section-divider" />
+          <div className="danger-zone">
+            <div>
+              <strong>Delete account</strong>
+              <span className="muted" style={{ display: 'block', fontSize: '.8rem' }}>
+                Permanently removes your profile, matches and messages. This cannot be undone.
+              </span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-danger btn-sm"
+              onClick={() => setConfirmDelete(true)}
+            >
+              Delete account
+            </button>
+          </div>
         </div>
 
         {/* Sticky save bar */}
@@ -332,6 +372,30 @@ export default function EditProfile() {
           </button>
         </div>
       </form>
+
+      {/* US-13: confirm before permanent deletion */}
+      {confirmDelete && (
+        <div className="modal-overlay" onMouseDown={() => setConfirmDelete(false)}>
+          <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Delete account?</h2>
+              <button className="btn-icon" onClick={() => setConfirmDelete(false)} title="Close">✕</button>
+            </div>
+            <p className="muted" style={{ marginBottom: 16 }}>
+              This permanently deletes your profile, all your matches and your messages.
+              This action cannot be undone.
+            </p>
+            <div className="modal-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setConfirmDelete(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={handleDelete}>
+                Yes, delete my account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

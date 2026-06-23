@@ -6,7 +6,9 @@
       "passwordHash": "$2a$10$ldZv7sh9oy6aVzx3K5FrMuEvVqYjRhYHdsbpuyWu9M7UNf6j769pW",
       "createdAt": "2026-05-19T08:30:20.939Z",
       "status": "active",
-      "blockedUserIds": [],
+      "blockedUserIds": [
+        "c7b53cc8-2844-480b-9002-4ec77ee93823"
+      ],
       "profile": {
         "firstName": "Michel",
         "lastName": "Nagele",
@@ -289,6 +291,446 @@
           "endTime": "20:00"
         }
       ]
+    },
+    {
+      "id": "b3b51911-92a2-4180-9381-fdfc6568b992",
+      "email": "test@gmail.com",
+      "passwordHash": "$2a$10$CwN2lFHbHOC34MBEsABHI.PelceLhA26rC.Yld.AMnwBH1AZ5XVTi",
+      "createdAt": "2026-06-16T07:17:00.803Z",
+      "profile": {
+        "firstName": "Fynnnnn",
+        "lastName": "Meyer",
+        "university": "BZZ",
+        "studyProgram": "Software Engineering",
+        "semester": 2,
+        "bio": "Lkwkdwwddwa",
+        "updatedAt": "2026-06-16T08:39:50.995Z"
+      },
+      "subjects": [
+        {
+          "name": "Wdawdaw",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
+    },
+    {
+      "id": "f365fc90-bd33-46e3-be5f-b48648412050",
+      "email": "test-11455@example.com",
+      "passwordHash": "$2a$10$wY/ZNqppcL9qGdW87h9y8e7pXV7ZwDbt3vEXg2C3pcGqnOsWtF8cG",
+      "createdAt": "2026-06-16T08:38:56.673Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": null,
+      "subjects": [],
+      "learningGoals": [],
+      "availability": []
+    },
+    {
+      "id": "feee9a77-1964-42a6-bcbd-872af797f999",
+      "email": "cb-1781599172910@x.com",
+      "passwordHash": "$2a$10$reolL1SaS2P37IiXCBtR0.eZx3h5tzTl/3GwCHFOqvjjlfzKd9Fta",
+      "createdAt": "2026-06-16T08:39:32.963Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Bea",
+        "lastName": "Beta",
+        "university": "",
+        "studyProgram": "",
+        "semester": null,
+        "bio": "",
+        "updatedAt": "2026-06-16T08:39:32.965Z"
+      },
+      "subjects": [],
+      "learningGoals": [],
+      "availability": []
+    },
+    {
+      "id": "46a46f0d-9a6c-4954-a286-f2f946d5713e",
+      "email": "cc-1781599172966@x.com",
+      "passwordHash": "$2a$10$7FYik0YJM90lSLuDs421aOF7paPbg7R16MEm/kDWd.vLRK.Uo44M2",
+      "createdAt": "2026-06-16T08:39:33.018Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": null,
+      "subjects": [],
+      "learningGoals": [],
+      "availability": [],
+      "blockedUserIds": []
+    },
+    {
+      "id": "8ac78177-4234-40ca-8cf3-959a5fca11a0",
+      "email": "ma-1781599186818@x.com",
+      "passwordHash": "$2a$10$/1iqUWJaNMtGDI4oUfzDueWd0IrlNEFEh.SatL0.HOX1gz9jqY6im",
+      "createdAt": "2026-06-16T08:39:46.899Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Alice",
+        "lastName": "X",
+        "university": "",
+        "studyProgram": "",
+        "semester": null,
+        "bio": "",
+        "updatedAt": "2026-06-16T08:39:46.956Z"
+      },
+      "subjects": [
+        {
+          "name": "Math",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
+    },
+    {
+      "id": "53643c5a-4b01-4723-9656-398bc8fd9d74",
+      "email": "mb-1781599186903@x.com",
+      "passwordHash": "$2a$10$uZgKLE54yWlpk4/b6FmIFesR8TSBHYcGSGL6ST5kkoHGHfDMHLo6y",
+      "createdAt": "2026-06-16T08:39:46.954Z",
+      "status": "deactivated",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Bob",
+        "lastName": "X",
+        "university": "",
+        "studyProgram": "",
+        "semester": null,
+        "bio": "",
+        "updatedAt": "2026-06-16T08:39:46.959Z"
+      },
+      "subjects": [
+        {
+          "name": "Math",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
+    },
+    {
+      "id": "5a30121c-6e59-4452-95d7-fef19cac7e35",
+      "email": "lena@example.com",
+      "passwordHash": "$2a$10$L5SsLZ7K8maEyb1cojyXL.kmdAE7I5P06Fs/mJACoo/SFBdM1LRH2",
+      "createdAt": "2026-06-16T08:51:05.632Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Lena",
+        "lastName": "Hoffmann",
+        "university": "ETH Zürich",
+        "studyProgram": "Computer Science",
+        "semester": 3,
+        "bio": "CS student who loves algorithms and a good whiteboard session.",
+        "updatedAt": "2026-06-16T08:51:05.636Z"
+      },
+      "subjects": [
+        {
+          "name": "Linear Algebra",
+          "level": "intermediate",
+          "role": "offering",
+          "goal": "Help others ace the midterm"
+        },
+        {
+          "name": "Algorithms",
+          "level": "advanced",
+          "role": "offering",
+          "goal": ""
+        },
+        {
+          "name": "Statistics",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": "Finally understand hypothesis testing"
+        }
+      ],
+      "learningGoals": [
+        "Pass the exam by July",
+        "Build a study routine"
+      ],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "16:00",
+          "endTime": "18:00"
+        }
+      ]
+    },
+    {
+      "id": "c4057192-43bd-4715-a946-f92de5cd44c2",
+      "email": "marco@example.com",
+      "passwordHash": "$2a$10$mZYhnr/6uOxh.g5wPJkEEuOI33wV2CC78flQ4Rm7nSKKzytwxM7LS",
+      "createdAt": "2026-06-16T08:51:05.692Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Marco",
+        "lastName": "Bianchi",
+        "university": "ETH Zürich",
+        "studyProgram": "Mechanical Engineering",
+        "semester": 4,
+        "bio": "Engineer who needs a hand with the math-heavy courses.",
+        "updatedAt": "2026-06-16T08:51:05.694Z"
+      },
+      "subjects": [
+        {
+          "name": "Linear Algebra",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": "Survive the linear algebra exam"
+        },
+        {
+          "name": "Statistics",
+          "level": "intermediate",
+          "role": "offering",
+          "goal": ""
+        },
+        {
+          "name": "Thermodynamics",
+          "level": "advanced",
+          "role": "offering",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [
+        "Pass the exam by July"
+      ],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "10:00",
+          "endTime": "12:00"
+        }
+      ]
+    },
+    {
+      "id": "a989297d-bd76-48a8-8287-b3e3504054c1",
+      "email": "sara@example.com",
+      "passwordHash": "$2a$10$0h/F3giqEuYwvgUIIhh7Bu9QBv0RKNrWuVs0a5TyFV57C0pih2i66",
+      "createdAt": "2026-06-16T08:51:05.747Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Sara",
+        "lastName": "Keller",
+        "university": "University of Zurich",
+        "studyProgram": "Economics",
+        "semester": 2,
+        "bio": "Econ student, morning person, big fan of flashcards.",
+        "updatedAt": "2026-06-16T08:51:05.749Z"
+      },
+      "subjects": [
+        {
+          "name": "Statistics",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": "Get comfortable with regression"
+        },
+        {
+          "name": "Microeconomics",
+          "level": "intermediate",
+          "role": "offering",
+          "goal": ""
+        },
+        {
+          "name": "Algorithms",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [
+        "Build a study routine"
+      ],
+      "availability": [
+        {
+          "day": "Wednesday",
+          "startTime": "16:00",
+          "endTime": "19:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "09:00",
+          "endTime": "11:00"
+        }
+      ]
+    },
+    {
+      "id": "2da8a572-fba2-4b5a-8003-003330899c34",
+      "email": "jonas@example.com",
+      "passwordHash": "$2a$10$iz3ahzVEQy6bb3oQkJBG1uPXOFj/8UuhKqIvPJdbl1G9w/JXdKTF6",
+      "createdAt": "2026-06-16T08:51:05.802Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Jonas",
+        "lastName": "Weber",
+        "university": "ETH Zürich",
+        "studyProgram": "Physics",
+        "semester": 5,
+        "bio": "Physics nerd. Happy to explain math, looking for stats help.",
+        "updatedAt": "2026-06-16T08:51:05.803Z"
+      },
+      "subjects": [
+        {
+          "name": "Linear Algebra",
+          "level": "advanced",
+          "role": "offering",
+          "goal": ""
+        },
+        {
+          "name": "Statistics",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": "Understand p-values once and for all"
+        },
+        {
+          "name": "Quantum Mechanics",
+          "level": "intermediate",
+          "role": "offering",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [
+        "Pass the exam by July",
+        "Find a regular study partner"
+      ],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "19:00",
+          "endTime": "21:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "14:00",
+          "endTime": "17:00"
+        }
+      ]
+    },
+    {
+      "id": "e60f648c-1d21-4272-b9e9-ccded98cca45",
+      "email": "amira@example.com",
+      "passwordHash": "$2a$10$wZCldO8/qleb34rRVKpgGux7B82Wp//kv8t.pF9s.E5A.yDd.9LOS",
+      "createdAt": "2026-06-16T08:51:05.856Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Amira",
+        "lastName": "Said",
+        "university": "University of Zurich",
+        "studyProgram": "Data Science",
+        "semester": 3,
+        "bio": "Into ML and clean datasets. Can help with stats, want algorithms practice.",
+        "updatedAt": "2026-06-16T08:51:05.857Z"
+      },
+      "subjects": [
+        {
+          "name": "Statistics",
+          "level": "advanced",
+          "role": "offering",
+          "goal": "Coach others through stats"
+        },
+        {
+          "name": "Algorithms",
+          "level": "intermediate",
+          "role": "seeking",
+          "goal": "Crack dynamic programming"
+        },
+        {
+          "name": "Linear Algebra",
+          "level": "intermediate",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [
+        "Find a regular study partner",
+        "Build a study routine"
+      ],
+      "availability": [
+        {
+          "day": "Wednesday",
+          "startTime": "17:00",
+          "endTime": "19:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "15:00",
+          "endTime": "18:00"
+        }
+      ]
+    },
+    {
+      "id": "3c2743c4-f194-4ba4-bd53-d33d37549c96",
+      "email": "korel@gmail.com",
+      "passwordHash": "$2a$10$ou/B.g4LorMd1ZZJetDrRur8Ad04SMLWVICk598cFuU14ZxB12Yiu",
+      "createdAt": "2026-06-16T09:02:29.716Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Korel",
+        "lastName": "Uyar",
+        "university": "BZZ",
+        "studyProgram": "Software Engineering",
+        "semester": 4,
+        "bio": "peek",
+        "updatedAt": "2026-06-16T09:03:01.775Z"
+      },
+      "subjects": [
+        {
+          "name": "Prompting",
+          "level": "advanced",
+          "role": "offering",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [
+        "Prompting"
+      ],
+      "availability": [
+        {
+          "day": "Saturday",
+          "startTime": "00:00",
+          "endTime": "00:01"
+        }
+      ]
     }
   ],
   "connections": [
@@ -306,7 +748,15 @@
       "recipientId": "54e8fd65-62fd-47f4-a374-b770e714d3d0",
       "status": "accepted",
       "createdAt": "2026-06-02T07:31:30.464Z",
-      "updatedAt": "2026-06-02T07:31:39.635Z"
+      "updatedAt": "2026-06-16T09:39:32.814Z"
+    },
+    {
+      "id": "ba8b2d8d-40ab-4f58-aac6-9074b4360dd1",
+      "requesterId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "recipientId": "d6fb8c4a-601c-4367-9df2-ceae8b9769a6",
+      "status": "pending",
+      "createdAt": "2026-06-16T09:05:39.083Z",
+      "updatedAt": "2026-06-16T09:05:39.083Z"
     }
   ],
   "messages": [
@@ -330,6 +780,34 @@
       "senderId": "54e8fd65-62fd-47f4-a374-b770e714d3d0",
       "body": "hi",
       "createdAt": "2026-06-02T07:31:39.635Z"
+    },
+    {
+      "id": "24519f82-191d-491d-92c3-8b120f14d358",
+      "connectionId": "ba8b2d8d-40ab-4f58-aac6-9074b4360dd1",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "asdf",
+      "createdAt": "2026-06-16T09:05:39.083Z"
+    },
+    {
+      "id": "59226e3d-18b4-485e-bcc4-d0010fc87aca",
+      "connectionId": "17c53df1-80fa-46c4-9905-ac98860661ac",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "hi",
+      "createdAt": "2026-06-16T09:05:51.976Z"
+    },
+    {
+      "id": "7f5469da-0fef-4d13-bfe4-ade157c8707a",
+      "connectionId": "17c53df1-80fa-46c4-9905-ac98860661ac",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "hallo",
+      "createdAt": "2026-06-16T09:05:55.074Z"
+    },
+    {
+      "id": "88721974-c297-49ae-a37a-3374ae31cf55",
+      "connectionId": "17c53df1-80fa-46c4-9905-ac98860661ac",
+      "senderId": "79bbef4a-5d59-487d-8dfb-483c9a6cda09",
+      "body": "asdawdw",
+      "createdAt": "2026-06-16T09:39:32.814Z"
     }
   ]
 }

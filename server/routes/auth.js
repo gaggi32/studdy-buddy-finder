@@ -53,6 +53,8 @@ router.post('/register', async (req, res, next) => {
       email: normalizedEmail,
       passwordHash,
       createdAt: new Date().toISOString(),
+      status: 'active',
+      pausedUntil: null,
       profile: null,
       subjects: [],
       learningGoals: [],

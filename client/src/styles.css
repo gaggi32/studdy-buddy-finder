@@ -956,3 +956,45 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 .save-hint { font-size: .82rem; color: var(--text-muted); }
 .save-hint.dirty { color: var(--accent-h); font-weight: 600; }
+
+/* ── Solid danger button (US-13) ──────────────────────────── */
+.btn-danger {
+  background: var(--danger);
+  color: #1a0a0a;
+  border: 1px solid var(--danger);
+  font-weight: 600;
+}
+.btn-danger:hover:not(:disabled) { background: #fca5a5; border-color: #fca5a5; }
+
+/* ── Account status banner (US-11 / US-12) ────────────────── */
+.account-status-head { display: flex; align-items: flex-start; gap: 12px; }
+.account-status-title { font-weight: 600; }
+
+.status-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex: none;
+}
+.status-dot-ok   { background: #34d399; box-shadow: 0 0 0 4px #34d39922; }
+.status-dot-warn { background: #fbbf24; box-shadow: 0 0 0 4px #fbbf2422; }
+.status-dot-off  { background: var(--danger); box-shadow: 0 0 0 4px var(--danger-bg); }
+
+.account-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.pause-control { display: flex; align-items: center; gap: 6px; }
+.pause-control select { width: auto; }
+
+/* ── Danger zone (US-13) ──────────────────────────────────── */
+.danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}

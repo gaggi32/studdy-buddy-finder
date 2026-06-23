@@ -40,9 +40,17 @@ export const profileApi = {
     api.put(`/users/${userId}/subjects`, { subjects, learningGoals }).then((r) => r.data.user),
   saveAvailability: (userId, availability) =>
     api.put(`/users/${userId}/availability`, { availability }).then((r) => r.data.user),
-  // US-10: activate / deactivate the account.
+  // US-11: activate / deactivate the account with one call.
   setAccountStatus: (userId, status) =>
     api.put(`/users/${userId}/account`, { status }).then((r) => r.data.user),
+  // US-12: pause the profile for a number of days (auto-reactivates), or resume early.
+  pauseProfile: (userId, days) =>
+    api.put(`/users/${userId}/pause`, { days }).then((r) => r.data.user),
+  resumeProfile: (userId) =>
+    api.delete(`/users/${userId}/pause`).then((r) => r.data.user),
+  // US-13: permanently delete the account and all associated data.
+  deleteAccount: (userId) =>
+    api.delete(`/users/${userId}`).then(() => true),
   // US-06: block / unblock a user.
   blockUser: (userId, targetId) =>
     api.post(`/users/${userId}/block`, { targetId }).then((r) => r.data.user),
