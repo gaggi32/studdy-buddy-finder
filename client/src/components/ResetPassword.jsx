@@ -60,7 +60,7 @@ export default function ResetPassword() {
         </div>
 
         <h1>Neues Passwort festlegen</h1>
-        <p className="auth-card subtitle">Geben Sie Ihr neues Passwort für das Konto ein.</p>
+        <p className="subtitle">Geben Sie Ihr neues Passwort für das Konto ein.</p>
 
         {error && <div className="error-banner">⚠ {error}</div>}
         {success && <div className="toast toast-success" style={{ position: 'relative', top: 0, left: 0, transform: 'none', marginBottom: 16, width: '100%' }}>✓ {success}</div>}

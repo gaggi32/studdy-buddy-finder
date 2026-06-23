@@ -754,6 +754,39 @@
           "endTime": "00:01"
         }
       ]
+    },
+    {
+      "id": "ef16a63e-3ed6-41de-9c4b-2bda289b5ea8",
+      "email": "test@example.com",
+      "passwordHash": "$2a$10$a7FAOCoWDKQv/EtteKwDRuQCuPLpOxAEZejuU1X5eyyupb.4uM3ru",
+      "createdAt": "2026-06-23T08:48:51.501Z",
+      "status": "active",
+      "pausedUntil": null,
+      "profile": {
+        "firstName": "Test",
+        "lastName": "User",
+        "university": "",
+        "studyProgram": "",
+        "semester": null,
+        "bio": "",
+        "updatedAt": "2026-06-23T08:49:35.222Z"
+      },
+      "subjects": [
+        {
+          "name": "Linear Algebra",
+          "level": "beginner",
+          "role": "seeking",
+          "goal": ""
+        }
+      ],
+      "learningGoals": [],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "18:00",
+          "endTime": "20:00"
+        }
+      ]
     }
   ],
   "connections": [

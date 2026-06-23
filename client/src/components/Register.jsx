@@ -45,7 +45,7 @@ export default function Register() {
         </div>
 
         <h1>Create your account</h1>
-        <p className="auth-card subtitle">Find the perfect study partner in minutes.</p>
+        <p className="subtitle">Find the perfect study partner in minutes.</p>
 
         {error && <div className="error-banner">⚠ {error}</div>}
 

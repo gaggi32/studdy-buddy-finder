@@ -37,7 +37,7 @@ export default function Login() {
         </div>
 
         <h1>Welcome back</h1>
-        <p className="auth-card subtitle">Sign in to your account to continue.</p>
+        <p className="subtitle">Sign in to your account to continue.</p>
 
         {infoMessage && (
           <div className="toast toast-success" style={{ position: 'relative', top: 0, left: 0, transform: 'none', marginBottom: 16, width: '100%' }}>
